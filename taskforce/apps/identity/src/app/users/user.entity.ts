@@ -1,16 +1,26 @@
 import { genSalt, hash, compare } from 'bcrypt';
-import { User, UserRole } from '@taskforce/shared-types';
+import { User, UserCity, UserRole } from '@taskforce/shared-types';
 import { SALT_ROUNDS } from './user.constants';
 
 export class UserEntity implements User {
   public _id: string;
-  public avatar: string;
+  public avatar?: string;
   public birthDate: Date;
   public email: string;
   public name: string;
-  public surname: string;
+  public info?: string;
   public passwordHash: string;
+  public city: UserCity;
   public role: UserRole;
+
+  public publishedTasks?: number;
+  public newTasks?: number;
+
+  public specializations?: string[];
+  public rating?: number;
+  public rank?: number;
+  public completedTasks?: number;
+  public failedTasks?: number;
 
   constructor(user: User) {
     this.fillEntity(user);
@@ -26,27 +36,42 @@ export class UserEntity implements User {
     return compare(password, this.passwordHash);
   }
 
-  public toObject() {
-    return {
-      _id: this._id,
-      avatar: this.avatar,
-      email: this.email,
-      name: this.name,
-      surname: this.surname,
-      birthDate: this.birthDate,
-      passwordHash: this.passwordHash,
-      role: this.role,
-    };
-  }
 
   public fillEntity(user: User) {
     this._id = user._id;
     this.avatar = user.avatar;
     this.email = user.email;
     this.name = user.name;
-    this.surname = user.surname;
     this.birthDate = user.birthDate;
     this.passwordHash = user.passwordHash;
+    this.city = user.city;
     this.role = user.role;
+    this.publishedTasks = user.publishedTasks
+    this.newTasks = user.newTasks
+    this.specializations = user?.specializations;
+    this.rating = user?.rating;
+    this.rank = user?.rank;
+    this.completedTasks = user?.completedTasks;
+    this.failedTasks = user?.failedTasks;
+  }
+
+  public toObject() {
+    return {
+      _id: this._id,
+      email: this.email,
+      name: this.name,
+      avatar: this.avatar,
+      birthDate: this.birthDate,
+      passwordHash: this.passwordHash,
+      city: this.city,
+      role: this.role,
+      publishedTasks: this.publishedTasks,
+      newTasks: this.newTasks,
+      specializations: this.specializations,
+      rating: this.rating,
+      rank: this.rank,
+      completedTasks: this.completedTasks,
+      failedTasks: this.failedTasks,
+    };
   }
 }

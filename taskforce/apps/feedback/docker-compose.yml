@@ -1,0 +1,25 @@
+version: '3.5'
+services:
+  taskforce-feedback-postgres:
+    image: postgres:14-alpine
+    container_name: taskforce-feedback-postgres
+    environment:
+      POSTGRES_USER: 'admin'
+      POSTGRES_PASSWORD: 'test'
+      POSTGRES_DB: 'taskforce-feedback'
+    ports:
+      - '5433:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U admin -d test']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - ./db/postgres:/var/lib/postgresql/data
+    networks:
+      - taskforce
+
+networks:
+  taskforce:
+    driver: bridge

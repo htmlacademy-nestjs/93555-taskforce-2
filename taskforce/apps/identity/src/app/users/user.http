@@ -1,0 +1,48 @@
+
+
+@baseUrl =  http://localhost:3001
+@token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2M2JkZDU3OWExNDk4YmQ0YzM5ZTg2OGEiLCJlbWFpbCI6ImlkZW50aXR5MkB0ZXN0LnJ1Iiwicm9sZSI6ImN1c3RvbWVyIiwiaWF0IjoxNjczMzk0NjE3LCJleHAiOjE2NzMzOTUyMTd9.Dyk8OArzewcsBPtUSkpeTDeB3w74ZsgQuP0yYSnZoZc
+
+
+GET {{baseUrl}}/api/users/63bdd579a1498bd4c39e868a HTTP/1.1
+Authorization: {{token}}
+
+###
+
+PATCH {{baseUrl}}/api/users/password HTTP/1.1
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "email": "identity2@test.ru",
+  "password": "0123456",
+  "newPassword": "0123456"
+}
+###
+
+PATCH {{baseUrl}}/api/users HTTP/1.1
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "name": "The New Cat",
+  "city": "Санкт-Петербург",
+  "birthDate": "2002-02-22"
+}
+
+###
+
+POST {{baseUrl}}/api/users/avatars HTTP/1.1
+Authorization: {{token}}
+Content-Type: multipart/form-data; boundary=WebKitFormBoundary
+
+--WebKitFormBoundary
+Content-Disposition: form-data; name="avatar"; filename="avatar.png"
+Content-Type: image/png
+
+< ./avatar.png
+--WebKitFormBoundary--
+
+###
+
+

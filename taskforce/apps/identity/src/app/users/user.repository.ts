@@ -13,7 +13,7 @@ export class UserRepository
   constructor(
     @InjectModel(UserModel.name)
     private readonly userModel: Model<UserModel>
-  ) {}
+  ) { }
 
   public async create(userEntity: UserEntity): Promise<User> {
     const newUser = new this.userModel(userEntity);
@@ -21,8 +21,8 @@ export class UserRepository
     return newUser.save();
   }
 
-  public async findById(id: string): Promise<User> {
-    return this.userModel.findOne({ id }).exec();
+  public async findById(_id: string): Promise<User> {
+    return this.userModel.findOne({ _id }).exec();
   }
 
   public async findByEmail(email: string): Promise<User | null> {

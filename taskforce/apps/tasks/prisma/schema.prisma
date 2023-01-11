@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  output        = "../../../node_modules/@prisma/client-tasks"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TaskStatus {
+  CREATED
+  CANCELLED
+  PENDING
+  DONE
+  FAILED
+}
+
+model Task {
+  id          Int    @id @default(autoincrement())
+  title       String
+  description String
+
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  status  TaskStatus @default(CREATED)
+  price   Int
+  image   String
+  address String
+
+  tags        Tag[]
+  TagsOnTasks TagsOnTasks[]
+
+  comments Comment[]
+
+  userId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id    Int    @id @default(autoincrement())
+  title String @unique
+  tasks Task[]
+}
+
+model Tag {
+  id    Int    @id @default(autoincrement())
+  title String @unique
+
+  tasks       Task[]
+  TagsOnTasks TagsOnTasks[]
+}
+
+model TagsOnTasks {
+  taskId Int
+  task   Task @relation(fields: [taskId], references: [id])
+
+  tagId Int
+  tag   Tag @relation(fields: [tagId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([taskId, tagId])
+}
+
+model Comment {
+  id   Int    @id @default(autoincrement())
+  text String
+
+  taskId Int
+  task   Task @relation(fields: [taskId], references: [id])
+
+  userId    String
+  createdAt DateTime @default(now())
+}

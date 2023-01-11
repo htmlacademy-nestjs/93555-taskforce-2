@@ -1,13 +1,7 @@
 import { Tag } from './tag';
 import { Comment } from './comment';
 
-export enum TaskStatus {
-  Created = 'admin',
-  Cancelled = 'user',
-  Pending = 'pending',
-  Done = 'done',
-  Failed = 'failed',
-}
+export type TaskStatus = "CREATED" | "CANCELLED" | "PENDING" | "DONE" | "FAILED"
 
 export interface Task {
   id?: number;

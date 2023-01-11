@@ -1,19 +1,32 @@
 import { Injectable } from '@nestjs/common';
+import { Comment } from '@taskforce/shared-types';
+import { CommentsEntity } from './comments.entity';
+import { CommentsRepository } from './comments.repository';
+import { CreateCommentDTO } from './dto/create-comment.dto';
+import { UpdateCommentDTO } from './dto/update-comment.dto';
 
 @Injectable()
 export class CommentsService {
-  async getComments(taskId: string) {
-    // Будет реализовано в модуле: Nest и базы данных. PostgreSQL
-    return [];
+  constructor(private readonly commentsRepository: CommentsRepository) { }
+
+  async createComment(dto: CreateCommentDTO): Promise<Comment> {
+    const commentsEntity = new CommentsEntity(dto);
+    return this.commentsRepository.create(commentsEntity);
   }
 
-  async createComment(taskId: string) {
-    // Будет реализовано в модуле: Nest и базы данных. PostgreSQL
-    return {};
+  async deleteComment(id: number): Promise<void> {
+    this.commentsRepository.delete(id);
   }
 
-  async updateComment(taskId: string, commentId: string) {
-    // Будет реализовано в модуле: Nest и базы данных. PostgreSQL
-    return {};
+  async getComment(id: number): Promise<Comment> {
+    return this.commentsRepository.findById(id);
+  }
+
+  async getComments(taskId: number): Promise<Comment[]> {
+    return this.commentsRepository.findByTask(taskId);
+  }
+
+  async updateComment(id: number, dto: UpdateCommentDTO): Promise<Comment> {
+    return this.commentsRepository.update(id, new CommentsEntity(dto));
   }
 }

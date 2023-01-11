@@ -8,6 +8,9 @@ export class CommentRDO {
   public text: string;
 
   @Expose()
+  public taskId: number;
+
+  @Expose()
   public userId: string;
 
   @Expose()

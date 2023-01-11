@@ -6,14 +6,18 @@
   "targets": {
     "build": {
       "executor": "@nrwl/webpack:webpack",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "target": "node",
         "compiler": "tsc",
         "outputPath": "dist/apps/tasks",
         "main": "apps/tasks/src/main.ts",
         "tsConfig": "apps/tasks/tsconfig.app.json",
-        "assets": ["apps/tasks/src/assets"]
+        "assets": [
+          "apps/tasks/src/assets"
+        ]
       },
       "configurations": {
         "production": {
@@ -42,17 +46,48 @@
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["apps/tasks/**/*.ts"]
+        "lintFilePatterns": [
+          "apps/tasks/**/*.ts"
+        ]
       }
     },
-    "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+    "db-validate": {
+      "executor": "nx:run-commands",
       "options": {
-        "jestConfig": "apps/tasks/jest.config.ts",
-        "passWithNoTests": true
+        "command": "npx prisma validate --schema ./prisma/schema.prisma",
+        "cwd": "apps/tasks"
+      }
+    },
+    "db-migrate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx prisma migrate dev --schema ./prisma/schema.prisma --name initial --skip-generate --skip-seed",
+        "cwd": "apps/tasks"
+      }
+    },
+    "db-reset": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx prisma migrate reset --schema ./prisma/schema.prisma --force --skip-generate --skip-seed",
+        "cwd": "apps/tasks"
+      }
+    },
+    "db-generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx prisma generate --schema ./prisma/schema.prisma",
+        "cwd": "apps/tasks"
+      }
+    },
+    "db-fill": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx prisma db seed",
+        "cwd": "apps/tasks"
       }
     }
   },

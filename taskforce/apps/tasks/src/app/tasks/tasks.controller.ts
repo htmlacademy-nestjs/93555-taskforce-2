@@ -1,19 +1,22 @@
-import { Controller, Get, HttpStatus, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { CreateTaskDTO } from './dto/create-task.dto';
+import { UpdateTaskDTO } from './dto/update-task.dto';
+import { TaskQuery } from './query/task.query';
 import { TasksService } from './tasks.service';
 
 @ApiTags('tasks')
 @Controller('tasks')
 export class TasksController {
-  constructor(private readonly taskService: TasksService) {}
+  constructor(private readonly taskService: TasksService) { }
 
   @Post()
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: 'Task created',
   })
-  async createTask() {
-    return this.taskService.createTask();
+  async createTask(@Body() dto: CreateTaskDTO) {
+    return this.taskService.createTask(dto);
   }
 
   @Get()
@@ -21,8 +24,8 @@ export class TasksController {
     status: HttpStatus.OK,
     description: 'Tasks list',
   })
-  async getTasks() {
-    return this.taskService.getTasks();
+  async getTasks(@Query() query: TaskQuery) {
+    return this.taskService.getTasks(query);
   }
 
   @Get(':taskId')
@@ -30,16 +33,17 @@ export class TasksController {
     status: HttpStatus.OK,
     description: 'Task found',
   })
-  async getTask(@Param('taskId') taskId: string) {
+  async getTask(@Param('taskId') taskId: number) {
     return this.taskService.getTask(taskId);
   }
 
-  @Put(':taskId')
+  @Patch(':taskId')
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Task found',
+    description: 'Task updated',
   })
-  async updateTask(@Param('taskId') taskId: string) {
-    return this.taskService.getTask(taskId);
+  async updateTask(@Param('taskId') taskId: number, @Body() dto: UpdateTaskDTO) {
+
+    return this.taskService.updateTask(taskId, dto);
   }
 }

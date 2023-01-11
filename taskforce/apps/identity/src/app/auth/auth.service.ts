@@ -1,62 +1,65 @@
-import { Injectable } from '@nestjs/common';
-import * as dayjs from 'dayjs';
-import { UserRole } from '@taskforce/shared-types';
-import { UserRepository } from '../users/user.repository';
-import { UserSignUpDTO } from './dto/user-signup.dto';
-import { UserSignInDTO } from './dto/user-signin.dto';
-import {
-  USER_EXISTS,
-  USER_NOT_FOUND,
-  USER_PASSWORD_WRONG,
-} from './auth.constant';
-import { UserEntity } from '../users/user.entity';
+import { Inject, Injectable } from '@nestjs/common';
+import { JwtPayload, Token } from '@taskforce/shared-types';
+import { JwtService } from '@nestjs/jwt';
+import { ClientProxy } from '@nestjs/microservices';
+import { TokensRepository } from '../tokens/tokens.repository';
+import { TokensEntity } from '../tokens/tokens.entity';
+import { fillObject } from '@taskforce/core';
+import { TokenRDO } from '../tokens/rdo/token.rdo';
+import { TokenDataDTO } from '../tokens/dto/token-data.dto';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    @Inject('JwtAccessService') private readonly jwtAccessService: JwtService,
+    @Inject('JwtRefreshService') private readonly jwtRefreshService: JwtService,
+    private readonly tokensRepository: TokensRepository,
+  ) { }
 
-  async signup(dto: UserSignUpDTO) {
-    const { email, name, surname, password, birthDate } = dto;
-    const user = {
-      _id: '',
-      email,
-      name,
-      surname,
-      role: UserRole.User,
-      avatar: '',
-      birthDate: dayjs(birthDate).toDate(),
-      passwordHash: '',
+  private async getAccessTokenInfo(token: string) {
+    return this.jwtAccessService.decode(token) as JwtPayload;
+  }
+
+  private async getRefreshTokenInfo(token: string) {
+    return this.jwtRefreshService.decode(token) as JwtPayload;
+  }
+
+  async generateAuthInfo(dto: TokenDataDTO) {
+    const payload = {
+      sub: dto._id,
+      email: dto.email,
+      role: dto.role,
     };
 
-    const existUser = await this.userRepository.findByEmail(email);
+    const accessToken = await this.jwtAccessService.signAsync(payload);
 
-    if (existUser) {
-      throw new Error(USER_EXISTS);
+    const refreshToken = await this.jwtRefreshService.signAsync(payload);
+    const refreshTokenInfo = await this.getRefreshTokenInfo(refreshToken);
+    const refreshTokenEntity = new TokensEntity({ userId: dto._id, exp: new Date(refreshTokenInfo.exp * 1000) });
+
+    await refreshTokenEntity.setToken(refreshToken);
+
+    const existedRefreshToken = await this.tokensRepository.findByUserId(dto._id);
+
+    if (existedRefreshToken) {
+      const { id: refreshTokenId } = fillObject(TokenRDO, existedRefreshToken);
+      await this.tokensRepository.update(refreshTokenId, refreshTokenEntity)
+    } else {
+      await this.tokensRepository.create(refreshTokenEntity);
     }
 
-    const userEntity = await new UserEntity(user).setPassword(password);
-
-    return this.userRepository.create(userEntity);
+    return {
+      _id: dto._id,
+      email: dto.email,
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    };
   }
 
-  async verifyUser(dto: UserSignInDTO) {
-    const { email, password } = dto;
-    const existUser = await this.userRepository.findByEmail(email);
 
-    if (!existUser) {
-      throw new Error(USER_NOT_FOUND);
-    }
+  async getUserSessionByToken(token: string): Promise<Token | null> {
+    const tokenInfo = await this.getAccessTokenInfo(token);
 
-    const userEntity = new UserEntity(existUser);
-
-    if (!(await userEntity.comparePassword(password))) {
-      throw new Error(USER_PASSWORD_WRONG);
-    }
-
-    return userEntity.toObject();
-  }
-
-  async getUser(id: string) {
-    return this.userRepository.findById(id);
+    return this.tokensRepository.findByUserId(tokenInfo.sub);
   }
 }

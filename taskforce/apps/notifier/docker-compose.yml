@@ -1,0 +1,41 @@
+version: '3.5'
+services:
+  fakesmtp:
+    image: gessnerfl/fake-smtp-server
+    container_name: 'taskforce-notifier-fakesmtp'
+    hostname: 'fakesmtp'
+    ports:
+      - '5025:5025'
+      - '1083:5080'
+
+  rabbitmq:
+    image: rabbitmq:3.11-management
+    container_name: taskforce-notifier-rabbitmq
+    ports:
+      - '1084:15672'
+      - '5672:5672'
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: test
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongodb:
+    image: mongo
+    container_name: taskforce-notifier-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: test
+      MONGO_INITDB_DATABASE: taskforce-notifier
+    ports:
+      - 27019:27017
+    volumes:
+      - ./db:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/taskforce-notifier --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5

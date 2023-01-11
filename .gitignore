@@ -17,3 +17,5 @@ taskforce/dist/
 *.env
 
 db
+postgres
+pgadmin

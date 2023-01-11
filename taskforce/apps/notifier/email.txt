@@ -1,0 +1,6 @@
+From: Vitalii Iashchuk <info@iashchuk.ru>
+To: Keks <224box@mail.ru>
+Subject: Hello
+Content-Type: plain/text; charset=utf8
+
+Hello Keks! From fake smpt server
